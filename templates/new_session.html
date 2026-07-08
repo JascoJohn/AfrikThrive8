@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AfrikThrive8 Foundation — New Session Link Builder</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='brand.css') }}">
+<style>
+.result{background:var(--light);border:1px solid #cfe0cd;border-radius:10px;padding:14px 16px;margin-top:14px;display:none;}
+.result.show{display:block;}
+.result label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--green);font-weight:700;}
+.result .linkrow{display:flex;gap:8px;margin:6px 0 14px;}
+.result input[readonly]{background:#fff;font-size:12.5px;}
+.result button.copy{width:auto;padding:9px 14px;margin:0;flex-shrink:0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <img class="logo" src="{{ url_for('static', filename='logo.png') }}" alt="AfrikThrive8 Foundation">
+  <div class="card">
+    <div class="header navy">
+      <p class="eyebrow">Internal Tool</p>
+      <h1>New Session Link Builder</h1>
+      <p class="sub">Fill this in once per Master Talk. It generates the exact links to share — no file editing needed. The session becomes its own dashboard tab the moment the first person registers.</p>
+    </div>
+    <form id="builder" onsubmit="return false;" style="padding:26px 28px 30px;">
+      <div class="field"><label>Session Topic / Title <span class="required">*</span></label>
+        <input type="text" id="topic" required placeholder="e.g. CV/Resume Writing, Interview Skills &amp; Job-Search Strategy"></div>
+      <div class="field"><label>Date</label><input type="text" id="date" placeholder="e.g. 15 Aug 2026"></div>
+      <div class="field"><label>Platform</label><input type="text" id="platform" value="X Space"></div>
+      <div class="field"><label>Session Slug (auto-generated — edit if you like)</label><input type="text" id="slug"></div>
+      <button onclick="build()">Generate Links</button>
+    </form>
+
+    <div class="result" id="result" style="margin:0 28px 28px;">
+      <label>Participant Registration Link</label>
+      <div class="linkrow"><input type="text" id="pLink" readonly><button class="copy" onclick="copyField('pLink')">Copy</button></div>
+      <label>Speaker Call-Out Link (prefills their Topic field)</label>
+      <div class="linkrow"><input type="text" id="sLink" readonly><button class="copy" onclick="copyField('sLink')">Copy</button></div>
+      <label>Dashboard Tab</label>
+      <div class="linkrow"><input type="text" id="dashNote" readonly></div>
+    </div>
+  </div>
+  <p class="foot"><strong>AfrikThrive8 Foundation</strong> · Internal Tool</p>
+</div>
+<script>
+const topicEl = document.getElementById('topic');
+const slugEl = document.getElementById('slug');
+let slugManuallyEdited = false;
+slugEl.addEventListener('input', () => slugManuallyEdited = true);
+topicEl.addEventListener('input', () => {
+  if (!slugManuallyEdited) slugEl.value = slugify(topicEl.value);
+});
+function slugify(s){
+  return s.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+}
+function build(){
+  const topic = topicEl.value.trim();
+  if (!topic){ topicEl.focus(); return; }
+  const slug = slugEl.value.trim() || slugify(topic);
+  const date = document.getElementById('date').value.trim() || 'TBC';
+  const platform = document.getElementById('platform').value.trim() || 'X Space';
+  const base = window.location.origin;
+  const pLink = `${base}/participant?session=${encodeURIComponent(slug)}&topic=${encodeURIComponent(topic)}&date=${encodeURIComponent(date)}&platform=${encodeURIComponent(platform)}`;
+  const sLink = `${base}/speaker?topic=${encodeURIComponent(topic)}`;
+  document.getElementById('pLink').value = pLink;
+  document.getElementById('sLink').value = sLink;
+  document.getElementById('dashNote').value = `Will appear as: "${topic} (0)" until first registration`;
+  document.getElementById('result').classList.add('show');
+}
+function copyField(id){
+  const el = document.getElementById(id);
+  el.select(); el.setSelectionRange(0, 99999);
+  navigator.clipboard.writeText(el.value);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AfrikThrive8 Foundation — Dashboard</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='brand.css') }}">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+body{padding:24px 16px 64px;}
+.dash-wrap{max-width:1100px;margin:0 auto;}
+.dash-head{display:flex;align-items:center;gap:16px;margin-bottom:22px;}
+.dash-head img{height:56px;}
+.dash-head h1{font-size:22px;margin:0;color:var(--navy);}
+.dash-head p{margin:2px 0 0;font-size:13px;color:#7a7462;}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;border-bottom:2px solid var(--line);padding-bottom:0;}
+.tab-btn{background:#fff;border:1px solid var(--line);border-bottom:none;padding:9px 16px;border-radius:10px 10px 0 0;font-size:13px;font-weight:600;color:var(--navy);cursor:pointer;}
+.tab-btn.active{background:var(--green);color:#fff;border-color:var(--green);}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:22px;}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px;}
+.kpi .num{font-size:28px;font-weight:800;color:var(--green);}
+.kpi .lbl{font-size:12px;color:#7a7462;text-transform:uppercase;letter-spacing:.06em;margin-top:4px;}
+.chart-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px;}
+.chart-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;}
+.chart-card h3{margin:0 0 10px;font-size:13px;color:var(--navy);text-transform:uppercase;letter-spacing:.05em;}
+.chart-card canvas{max-height:260px;}
+.empty{padding:60px 20px;text-align:center;color:#8a856f;font-size:14px;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;}
+th{background:var(--light);color:var(--navy);}
+.avatar{width:34px;height:34px;border-radius:50%;object-fit:cover;background:#ddd;vertical-align:middle;}
+.pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;}
+.pill.good{background:#e6f4ea;color:var(--green);}
+.pill.warn{background:#fff3dd;color:#8a5a00;}
+</style>
+</head>
+<body>
+<div class="dash-wrap">
+  <div class="dash-head">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="">
+    <div>
+      <h1>AfrikThrive8 Foundation — Live Dashboard</h1>
+      <p>Auto-updates from form submissions. Each session becomes its own tab.</p>
+    </div>
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+  <div id="content"></div>
+</div>
+
+<script>
+let sessions = [];
+let activeTab = 'speakers'; // default landing tab
+const charts = {};
+
+function destroyCharts(){ Object.values(charts).forEach(c=>c.destroy()); for(const k in charts) delete charts[k]; }
+
+async function loadTabs(){
+  const res = await fetch('/api/sessions');
+  sessions = await res.json();
+  const tabsEl = document.getElementById('tabs');
+  tabsEl.innerHTML = '';
+  const speakerBtn = document.createElement('button');
+  speakerBtn.className = 'tab-btn' + (activeTab==='speakers' ? ' active':'');
+  speakerBtn.textContent = 'Speakers Pool';
+  speakerBtn.onclick = () => selectTab('speakers');
+  tabsEl.appendChild(speakerBtn);
+
+  sessions.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'tab-btn' + (activeTab===s.session ? ' active':'');
+    btn.textContent = `${s.label} (${s.n})`;
+    btn.onclick = () => selectTab(s.session);
+    tabsEl.appendChild(btn);
+  });
+
+  if (sessions.length === 0 && activeTab !== 'speakers') activeTab = 'speakers';
+  render();
+}
+
+function selectTab(key){ activeTab = key; loadTabs(); }
+
+async function render(){
+  const content = document.getElementById('content');
+  destroyCharts();
+  if (activeTab === 'speakers'){
+    await renderSpeakers(content);
+  } else {
+    await renderSession(content, activeTab);
+  }
+}
+
+async function renderSession(content, session){
+  const res = await fetch(`/api/dashboard-data/${encodeURIComponent(session)}`);
+  const d = await res.json();
+  if (d.total === 0){ content.innerHTML = '<div class="empty">No registrations yet for this session.</div>'; return; }
+
+  content.innerHTML = `
+    <div class="kpi-row">
+      <div class="kpi"><div class="num">${d.total}</div><div class="lbl">Total Registrations</div></div>
+      <div class="kpi"><div class="num">${Object.keys(d.country).length}</div><div class="lbl">Countries Reached</div></div>
+      <div class="kpi"><div class="num">${topKey(d.age_group)||'—'}</div><div class="lbl">Top Age Group</div></div>
+      <div class="kpi"><div class="num">${topKey(d.source)||'—'}</div><div class="lbl">Top Channel</div></div>
+    </div>
+    <div class="chart-grid">
+      <div class="chart-card"><h3>Registrations Over Time</h3><canvas id="c_timeline"></canvas></div>
+      <div class="chart-card"><h3>Age Group</h3><canvas id="c_age"></canvas></div>
+      <div class="chart-card"><h3>Gender</h3><canvas id="c_gender"></canvas></div>
+      <div class="chart-card"><h3>Country</h3><canvas id="c_country"></canvas></div>
+      <div class="chart-card"><h3>Status</h3><canvas id="c_status"></canvas></div>
+      <div class="chart-card"><h3>How They Heard About Us</h3><canvas id="c_source"></canvas></div>
+    </div>`;
+
+  const palette = ['#2e7d32','#e8a020','#1b2a5e','#6fbf73','#f0c060','#4a6fa5','#a8d5aa'];
+  lineChart('c_timeline', d.timeline);
+  pieChart('c_age', d.age_group, palette);
+  pieChart('c_gender', d.gender, palette);
+  barChart('c_country', d.country, palette);
+  pieChart('c_status', d.status, palette);
+  barChart('c_source', d.source, palette);
+}
+
+function topKey(obj){
+  const e = Object.entries(obj); if(!e.length) return null;
+  return e.sort((a,b)=>b[1]-a[1])[0][0];
+}
+function lineChart(id, dataObj){
+  const labels = Object.keys(dataObj), data = Object.values(dataObj);
+  charts[id] = new Chart(document.getElementById(id), {type:'line',
+    data:{labels, datasets:[{data, borderColor:'#2e7d32', backgroundColor:'rgba(46,125,50,.12)', fill:true, tension:.3}]},
+    options:{plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true, ticks:{precision:0}}}}});
+}
+function pieChart(id, dataObj, palette){
+  charts[id] = new Chart(document.getElementById(id), {type:'doughnut',
+    data:{labels:Object.keys(dataObj), datasets:[{data:Object.values(dataObj), backgroundColor:palette}]},
+    options:{plugins:{legend:{position:'bottom', labels:{boxWidth:12,font:{size:11}}}}}});
+}
+function barChart(id, dataObj, palette){
+  charts[id] = new Chart(document.getElementById(id), {type:'bar',
+    data:{labels:Object.keys(dataObj), datasets:[{data:Object.values(dataObj), backgroundColor:palette[0]}]},
+    options:{plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true, ticks:{precision:0}}}}});
+}
+
+async function renderSpeakers(content){
+  const res = await fetch('/api/speakers');
+  const speakers = await res.json();
+  if (speakers.length === 0){ content.innerHTML = '<div class="empty">No speaker applications yet.</div>'; return; }
+  let rows = speakers.map(s => `
+    <tr>
+      <td>${s.headshot_path ? `<img class="avatar" src="${s.headshot_path}">` : ''}</td>
+      <td>${s.full_name}</td>
+      <td>${s.title || ''}${s.organization ? ' · '+s.organization : ''}</td>
+      <td>${s.topic || ''}</td>
+      <td>${s.country || ''}</td>
+      <td>${s.avg_overall !== null ? s.avg_overall + ' / 5' : '—'}</td>
+      <td>${s.invite_again_pct !== null ? `<span class="pill ${s.invite_again_pct>=50?'good':'warn'}">${s.invite_again_pct}% Yes</span>` : '—'}</td>
+    </tr>`).join('');
+  content.innerHTML = `
+    <div class="kpi-row">
+      <div class="kpi"><div class="num">${speakers.length}</div><div class="lbl">Total Speaker Applications</div></div>
+      <div class="kpi"><div class="num">${speakers.filter(s=>s.eval_count>0).length}</div><div class="lbl">Evaluated So Far</div></div>
+    </div>
+    <div class="chart-card">
+      <h3>Speaker Pool</h3>
+      <table><thead><tr><th></th><th>Name</th><th>Title / Org</th><th>Topic</th><th>Country</th><th>Avg Score</th><th>Invite Again</th></tr></thead>
+      <tbody>${rows}</tbody></table>
+    </div>`;
+}
+
+loadTabs();
+setInterval(loadTabs, 15000); // auto-refresh every 15s
+</script>
+</body>
+</html>

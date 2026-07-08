@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AfrikThrive8 Foundation — Register: {{ topic }}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='brand.css') }}">
+</head>
+<body>
+<div class="wrap">
+  <img class="logo" src="{{ url_for('static', filename='logo.png') }}" alt="AfrikThrive8 Foundation">
+  <div class="card">
+    <div class="header green">
+      <p class="eyebrow">Free Masterclass · Open to All</p>
+      <h1>{{ topic }}</h1>
+      <p class="sub">A free virtual session by AfrikThrive8 Foundation for African youth and women building career, technology and vocational skills.</p>
+      <div class="meta-row">
+        <span class="meta-item">📅 Date: {{ date }}</span>
+        <span class="meta-item">📍 Platform: {{ platform }}</span>
+        <span class="meta-item">🆓 Free</span>
+      </div>
+    </div>
+
+    <form action="{{ url_for('participant_submit') }}" method="POST">
+      <input type="hidden" name="session" value="{{ session_slug }}">
+      <input type="hidden" name="session_label" value="{{ topic }}">
+
+      <div class="field"><label>Full Name <span class="required">*</span></label><input type="text" name="fullName" required></div>
+      <div class="field"><label>Email Address <span class="required">*</span></label><input type="email" name="email" required></div>
+      <div class="field"><label>WhatsApp / Phone Number</label><input type="tel" name="phone"></div>
+      <div class="field"><label>Country</label><input type="text" name="country"></div>
+      <div class="field">
+        <fieldset><legend>Age Group <span class="required">*</span></legend>
+          <div class="radio-group">
+            <label><input type="radio" name="age" value="18-24" required> 18–24</label>
+            <label><input type="radio" name="age" value="25-30"> 25–30</label>
+            <label><input type="radio" name="age" value="31-35"> 31–35</label>
+            <label><input type="radio" name="age" value="36+"> 36+</label>
+          </div>
+        </fieldset>
+      </div>
+      <div class="field">
+        <fieldset><legend>Gender</legend>
+          <div class="radio-group">
+            <label><input type="radio" name="gender" value="Woman"> Woman</label>
+            <label><input type="radio" name="gender" value="Man"> Man</label>
+            <label><input type="radio" name="gender" value="Prefer not to say"> Prefer not to say</label>
+          </div>
+        </fieldset>
+      </div>
+      <div class="field"><label>Current Status</label>
+        <select name="status"><option value="">Select one</option><option>Student</option><option>Unemployed / job seeking</option><option>Employed (formal)</option><option>Self-employed / informal work</option><option>Entrepreneur / running a business</option><option>Other</option></select>
+      </div>
+      <div class="field"><label>What do you hope to gain from this session?</label><textarea name="goal" rows="3"></textarea></div>
+      <div class="field"><label>How did you hear about us?</label>
+        <select name="source"><option value="">Select one</option><option>X (Twitter)</option><option>WhatsApp</option><option>Instagram</option><option>Facebook</option><option>Friend / referral</option><option>Other</option></select>
+      </div>
+      <label class="hint" style="display:flex;gap:8px;"><input type="checkbox" required> I agree to receive updates from AfrikThrive8 Foundation.</label>
+      <button type="submit">Register for Free</button>
+    </form>
+  </div>
+  <p class="foot"><strong>AfrikThrive8 Foundation</strong> · Non-Profit Organization<br>✉ <a href="mailto:afrikthrive8@outlook.com">afrikthrive8@outlook.com</a></p>
+</div>
+</body>
+</html>

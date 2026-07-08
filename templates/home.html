@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AfrikThrive8 Foundation — App Home</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='brand.css') }}">
+<style>
+.linklist{display:flex;flex-direction:column;gap:10px;padding:26px 28px 30px;}
+.linklist a{display:block;background:#fdfcf9;border:1px solid var(--line);border-radius:10px;padding:14px 16px;text-decoration:none;color:var(--navy);font-weight:600;font-size:14px;}
+.linklist a:hover{border-color:var(--green);}
+.linklist small{display:block;font-weight:400;color:#8a856f;margin-top:3px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <img class="logo" src="{{ url_for('static', filename='logo.png') }}" alt="AfrikThrive8 Foundation">
+  <div class="card">
+    <div class="header navy">
+      <p class="eyebrow">AfrikThrive8 Foundation</p>
+      <h1>Forms &amp; Dashboard</h1>
+      <p class="sub">Pick where you want to go.</p>
+    </div>
+    <div class="linklist">
+      <a href="/dashboard">📊 Dashboard<small>Live registrations, speaker pool, evaluations</small></a>
+      <a href="/new-session">🔗 New Session Link Builder<small>Generate shareable links for your next Master Talk</small></a>
+      <a href="/speaker">🎤 Speaker Registration Form</a>
+      <a href="/participant?session=general&topic=AfrikThrive8 Master Talk">🧑‍🤝‍🧑 Participant Registration Form (general)</a>
+      <a href="/evaluate">📝 Internal Speaker Evaluation</a>
+    </div>
+  </div>
+  <p class="foot"><strong>AfrikThrive8 Foundation</strong> · afrikthrive8@outlook.com</p>
+</div>
+</body>
+</html>

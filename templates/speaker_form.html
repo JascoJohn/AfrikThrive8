@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AfrikThrive8 Foundation — Speaker Registration</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='brand.css') }}">
+</head>
+<body>
+<div class="wrap">
+  <img class="logo" src="{{ url_for('static', filename='logo.png') }}" alt="AfrikThrive8 Foundation">
+  <div class="card">
+    <div class="header navy">
+      <p class="eyebrow">AfrikThrive8 Foundation · Call for Speakers</p>
+      <h1>Speaker Registration Form</h1>
+      <p class="sub">Share your voice. Inspire change. Shape Africa's future. Complete this form to be considered as a speaker for our X Space events and masterclasses.</p>
+    </div>
+    <div class="pack-banner">
+      📄 Please read the <a href="{{ url_for('static', filename='AfrikThrive8_Speakers_Information_Pack.pdf') }}" target="_blank">Speakers Information Pack</a> before applying — it covers what speakers receive, speaking-time guidelines, and the consent terms below.
+    </div>
+
+    <form action="{{ url_for('speaker_submit') }}" method="POST" enctype="multipart/form-data">
+
+      <div class="section-label">Personal Details</div>
+      <div class="field"><label>Full Names <span class="required">*</span></label><input type="text" name="fullNames" required></div>
+      <div class="field">
+        <fieldset><legend>Marital Status</legend>
+          <div class="radio-group">
+            <label><input type="radio" name="marital" value="Single"> Single</label>
+            <label><input type="radio" name="marital" value="Married"> Married</label>
+            <label><input type="radio" name="marital" value="Prefer not to say"> Prefer not to say</label>
+          </div>
+        </fieldset>
+      </div>
+      <div class="field"><label>Age <span class="required">*</span></label><input type="text" name="age" required></div>
+      <div class="field"><label>Country <span class="required">*</span></label><input type="text" name="country" required></div>
+
+      <div class="section-label">Professional Details</div>
+      <div class="field"><label>Position / Career / Business Title <span class="required">*</span></label><input type="text" name="title" required></div>
+      <div class="field"><label>Company / Organization Name</label><input type="text" name="org" placeholder="If not applicable, write 'Self-employed'"></div>
+      <div class="field"><label>Professional Bio (100–150 words) <span class="required">*</span></label><textarea name="bio" rows="5" required></textarea></div>
+      <div class="field"><label>Professional Headshot <span class="required">*</span></label><input type="file" name="headshot" accept="image/*" required></div>
+
+      <div class="section-label">Contact &amp; Socials</div>
+      <div class="field"><label>Email <span class="required">*</span></label><input type="email" name="email" required></div>
+      <div class="field"><label>X (Twitter) Handle <span class="required">*</span></label><input type="text" name="xhandle" required placeholder="@yourhandle"></div>
+      <div class="field"><label>LinkedIn Profile</label><input type="url" name="linkedin" placeholder="https://linkedin.com/in/..."></div>
+
+      <div class="section-label">Speaking Details</div>
+      <div class="field"><label>Topic of Interest <span class="required">*</span></label><input type="text" name="topic" required value="{{ prefill_topic }}"></div>
+      <div class="field"><label>Previous Speaking Experience</label><textarea name="experience" rows="3"></textarea></div>
+
+      <div class="consent-box">
+        <p>"I grant AfrikThrive8 Foundation permission to record, publish, and promote my participation across its digital platforms."</p>
+        <label><input type="checkbox" name="consent" required> I agree to the statement above and have read the Speaker Guidelines. <span class="required">*</span></label>
+      </div>
+
+      <button type="submit">Submit Speaker Application</button>
+    </form>
+  </div>
+  <p class="foot"><strong>AfrikThrive8 Foundation</strong> · Non-Profit Organization<br>✉ <a href="mailto:afrikthrive8@outlook.com">afrikthrive8@outlook.com</a></p>
+</div>
+</body>
+</html>

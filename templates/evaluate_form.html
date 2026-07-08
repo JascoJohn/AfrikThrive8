@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AfrikThrive8 Foundation — Internal Speaker Evaluation</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='brand.css') }}">
+</head>
+<body>
+<div class="wrap">
+  <img class="logo" src="{{ url_for('static', filename='logo.png') }}" alt="AfrikThrive8 Foundation">
+  <div class="card">
+    <div class="header navy">
+      <p class="eyebrow">Internal Use Only</p>
+      <h1>Speaker Evaluation</h1>
+      <p class="sub">Complete this after each X Space or masterclass. Feeds directly into the Speakers tab on the dashboard.</p>
+    </div>
+    <form action="{{ url_for('evaluate_submit') }}" method="POST">
+      <div class="field"><label>Event / Session Title <span class="required">*</span></label><input type="text" name="session_label" required></div>
+      <div class="field"><label>Speaker Name <span class="required">*</span></label><input type="text" name="speaker_name" required></div>
+      <div class="field"><label>Topic</label><input type="text" name="topic"></div>
+      <div class="field"><label>Evaluated By</label><input type="text" name="evaluated_by"></div>
+
+      {% for key,lbl in [('knowledge','Knowledge'),('communication','Communication'),('engagement','Audience Engagement'),('time_management','Time Management'),('professionalism','Professionalism')] %}
+      <div class="field">
+        <fieldset><legend>{{ lbl }} (1 = Poor, 5 = Excellent) <span class="required">*</span></legend>
+          <div class="radio-group">
+            {% for n in [1,2,3,4,5] %}
+            <label><input type="radio" name="{{ key }}" value="{{ n }}" required> {{ n }}</label>
+            {% endfor %}
+          </div>
+        </fieldset>
+      </div>
+      {% endfor %}
+
+      <div class="field">
+        <fieldset><legend>Would we invite again?</legend>
+          <div class="radio-group">
+            <label><input type="radio" name="invite_again" value="Yes"> Yes</label>
+            <label><input type="radio" name="invite_again" value="No"> No</label>
+          </div>
+        </fieldset>
+      </div>
+      <div class="field"><label>Strengths</label><textarea name="strengths" rows="2"></textarea></div>
+      <div class="field"><label>Areas to Improve</label><textarea name="improve" rows="2"></textarea></div>
+      <button type="submit">Save Evaluation</button>
+    </form>
+  </div>
+  <p class="foot"><strong>AfrikThrive8 Foundation</strong> · Internal Tool</p>
+</div>
+</body>
+</html>

@@ -26,10 +26,13 @@ from flask import Flask, request, render_template, redirect, url_for, jsonify
 import db
 import storage
 
+import admin_routes
+
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024  # 8MB upload cap
 app.teardown_appcontext(db.close_db)
 
+admin_routes.register_admin_routes(app)
 
 def slugify(text):
     return "".join(c.lower() if c.isalnum() else "-" for c in (text or "")).strip("-") or "general"
